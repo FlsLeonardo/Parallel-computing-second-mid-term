@@ -1,0 +1,40 @@
+#!/bin/bash
+# Job name
+#PBS -N matTranspose1
+# Output files
+#PBS -o ./pbs/matrix_transpose.o
+#PBS -e ./pbs/matrix_transpose.e
+# Queue name
+#PBS -q short_cpuQ
+# Set the maximum wall time
+#PBS -l walltime=0:10:00
+# Number of nodes, cpus, mpi processors and amount of memory
+#PBS -l select=1:ncpus=96:ompthreads=96:mem=1mb
+
+# Modules for C
+module load gcc91
+
+# Select the working directory
+cd /home/leonardo.falsarolo/Parallel-computing-mid-term/method1/bin
+
+lscpu
+echo
+
+#compilation
+g++-9.1.0 -c main.cpp -fopenmp
+g++-9.1.0 -c serialTransposition.cpp
+g++-9.1.0 -c implicitTransposition.cpp -O1 -funroll-loops -ftree-loop-im
+g++-9.1.0 -c ompTransposition.cpp -fopenmp
+#linking
+g++-9.1.0 main.o serialTransposition.o implicitTransposition.o ompTransposition.o -o matTranspose1 -fopenmp
+#execution
+./matTranspose1 4 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 5 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 6 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 7 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 8 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 9 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 10 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 11 "O1 -funroll-loop -ftree-loop-im"
+./matTranspose1 12 "O1 -funroll-loop -ftree-loop-im"
+
