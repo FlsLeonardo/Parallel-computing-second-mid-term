@@ -13,18 +13,6 @@
 using namespace std;
 void writeToFile(const string& filename,const int dim_matrix, const double text, string num_threads_or_type_of_compile_opt = "0");
 
-void matTransposeSerial(vector<vector<float>>& M,int n,vector<vector<float>>& T,int n_thread);      //implementations of functions in main program
-void matTransposeMPI(vector<vector<float>>& M,int n,vector<vector<float>>& T,int n_thread);
-void matTransposeOmp(vector<vector<float>>& M,int n,vector<vector<float>>& T, int n_thread);
-
-bool checkSymSerial(const vector<vector<float>>& M,int n, int n_thread);
-bool checkSymMPI(const vector<vector<float>>& M,int n, int n_thread);
-bool checkSymOmp(const vector<vector<float>>& M,int n, int n_thread);
-
-void (*matTranspose)(vector<vector<float>>& M,int n,vector<vector<float>>& T, int n_thread) = nullptr;   // Puntatore alla funzione
-bool (*checkSym)(const vector<vector<float>>& M,int n,int n_thread) = nullptr;
-
-
 void initializeMatrix(vector<vector<float>>& matrix, int n) {     // Funzione per inizializzare una matrice n x n con numeri casuali a virgola mobile                                                                  
     random_device rd;                                             // Inizializzazione del generatore di numeri casuali
     mt19937 gen(rd());                                            
@@ -75,11 +63,43 @@ void writeToFile(const string& filename,const int dim_matrix, const double text,
     }
 }
 
+vector<float> flatten(const vector<vector<float>>& matrix) {
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+    vector<float> flatArray(rows * cols); // Creiamo un vettore unidimensionale
+    int index = 0;
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            flatArray[index++] = matrix[i][j]; // Inseriamo ogni elemento in ordine nel vettore
+        }
+    }
+    return flatArray; // Ritorniamo il vettore appiattito
+}
+
+vector<vector<float>> deflatten(const vector<float>& flatArray, int size) {
+    // Creiamo una matrice quadrata di dimensione size x size
+    vector<vector<float>> matrix(size, vector<float>(size));
+    int index = 0;
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            matrix[i][j] = flatArray[index++];  // Ripristiniamo i valori nel formato bidimensionale
+        }
+    }
+    return matrix;  // Ritorniamo la matrice ripristinata
+}
+
+void stampaFlat(const vector<float>& vec) {
+    for (float val : vec) {
+        cout << val << " ";
+    }
+    cout << endl;
+}
+
 int main(int argc, char* argv[]) {
     double wt1, wt2;  
     double Stime,Itime,Otime;                                           //for wall clock time
     int n_threads[8] = {1, 2, 4, 8, 16, 32, 64, 96};
-    int MPI_sizes[9] = {4,5,6,7,8,9,10,11,12};
+    int MPI_sizes[1] = {4};
     
     MPI_Init (& argc , & argv );
     int rank, sizee;
@@ -93,13 +113,11 @@ int main(int argc, char* argv[]) {
         //printMatrix(M,n);
         //printMatrix(T,n);
         if (rank == 0){
-          checkSym = checkSymSerial;
-          if(!checkSym(M,n,1)){
+          if(!checkSymSerial(M,n,1)){
             for (int i = 0; i < TEST; ++i) {
                     //Serial implementation---------------------------------------------
-                    matTranspose = matTransposeSerial;
                     wt1 = omp_get_wtime();
-                    matTranspose(M,n,T,1);
+                    matTransposeSerial(M,n,T,1);
                     wt2 = omp_get_wtime();
                     if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
                     Stime += (wt2 - wt1);
@@ -114,13 +132,11 @@ int main(int argc, char* argv[]) {
   
           cout << "Omp Implemenation"<< endl;
           for (int& thread_count : n_threads) {
-              checkSym = checkSymOmp;
-              if(!checkSym(M,n,thread_count)){
+              if(!checkSymOmp(M,n,thread_count)){
                 for (int i = 0; i < TEST; ++i) {
                     //Omp implementation-------------------------------------------------
-                    matTranspose = matTransposeOmp;
                     wt1 = omp_get_wtime();
-                    matTranspose(M,n,T,thread_count);
+                    matTransposeOmp(M,n,T,thread_count);
                     wt2 = omp_get_wtime();
                     if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
                     Otime += (wt2 - wt1);
@@ -136,19 +152,52 @@ int main(int argc, char* argv[]) {
         MPI_Barrier(MPI_COMM_WORLD);
         if (rank == 0){cout <<endl<< "MPI Implemenation"<< endl;}
         //MPI implementation-------------------------------------------
-        checkSym = checkSymMPI;
-        checkSym(M,n,1);
+        checkSymMPI(M,n,1);
+        vector<float> M_f = flatten(M);
+        vector<float> T_f = flatten(T);
+        vector<float> Z(n*n,0);
+        vector<float> final(64*64,0);
         for (int i = 0; i < TEST; ++i) {
-          matTranspose = matTransposeMPI;
+          MPI_Barrier(MPI_COMM_WORLD);
           wt1 = omp_get_wtime();
-          matTranspose(M,n,T,1);
+          matTransposeFlattenedMPI(M_f ,Z ,n ,rank ,sizee);
           wt2 = omp_get_wtime();
+          MPI_Barrier(MPI_COMM_WORLD);
+          T = deflatten(Z,n);
+          //MPI_Gather(Z.data(),n * n / sizee, MPI_FLOAT, final.data(),n * n / sizee, MPI_FLOAT,0, MPI_COMM_WORLD);
+          //stampaFlat(Z);
+          //T = deflatten(final,n);
           if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
           Itime += (wt2 - wt1);
           if (rank == 0){writeToFile("../output/MPI.csv",size,(wt2 - wt1),"n_processori_MPI_SIZE");} //-----------------------------------------write file implicit
         }
         cout <<" "<<size<< "\t" << (Itime/TEST)<< " sec\t" <<"rank "<<rank<<" size "<<sizee<< endl;
-        Itime = 0;    
+        Itime = 0;
+        
+        if (rank == 0){
+          // Stampa la matrice trasposta nel terminale
+          printMatrix(M, n);
+          cout << endl;
+          printMatrix(T, n);  // Stampa la matrice trasposta            
+        } 
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (rank == 1){
+          // Stampa la matrice trasposta nel terminale
+          //cout << "Matrix Transposed (T):" << endl;
+          printMatrix(T, n);  // Stampa la matrice trasposta            
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (rank == 2){
+          // Stampa la matrice trasposta nel terminale
+          //cout << "Matrix Transposed (T):" << endl;
+          printMatrix(T, n);  // Stampa la matrice trasposta            
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (rank == 3){
+          // Stampa la matrice trasposta nel terminale
+          //cout << "Matrix Transposed (T):" << endl;
+          printMatrix(T, n);  // Stampa la matrice trasposta            
+        }   
     }
     MPI_Finalize ();
     return 0;
