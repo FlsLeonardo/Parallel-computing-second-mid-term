@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     double wt1, wt2;  
     double Stime,Itime,Otime;                                           //for wall clock time
     int n_threads[8] = {1, 2, 4, 8, 16, 32, 64, 96};
-    int MPI_sizes[1] = {4};
+    int MPI_sizes[9] = {4,5,6,7,8,9,10,11,12};
     
     MPI_Init (& argc , & argv );
     int rank, sizee;
@@ -151,53 +151,36 @@ int main(int argc, char* argv[]) {
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if (rank == 0){cout <<endl<< "MPI Implemenation"<< endl;}
-        //MPI implementation-------------------------------------------
-        checkSymMPI(M,n,1);
-        vector<float> M_f = flatten(M);
-        vector<float> T_f = flatten(T);
-        vector<float> Z(n*n,0);
-        vector<float> final(64*64,0);
-        for (int i = 0; i < TEST; ++i) {
-          MPI_Barrier(MPI_COMM_WORLD);
-          wt1 = omp_get_wtime();
-          matTransposeFlattenedMPI(M_f ,Z ,n ,rank ,sizee);
-          wt2 = omp_get_wtime();
-          MPI_Barrier(MPI_COMM_WORLD);
-          T = deflatten(Z,n);
-          //MPI_Gather(Z.data(),n * n / sizee, MPI_FLOAT, final.data(),n * n / sizee, MPI_FLOAT,0, MPI_COMM_WORLD);
-          //stampaFlat(Z);
-          //T = deflatten(final,n);
-          if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
-          Itime += (wt2 - wt1);
-          if (rank == 0){writeToFile("../output/MPI.csv",size,(wt2 - wt1),"n_processori_MPI_SIZE");} //-----------------------------------------write file implicit
-        }
-        cout <<" "<<size<< "\t" << (Itime/TEST)<< " sec\t" <<"rank "<<rank<<" size "<<sizee<< endl;
-        Itime = 0;
-        
-        if (rank == 0){
-          // Stampa la matrice trasposta nel terminale
-          printMatrix(M, n);
-          cout << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        } 
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 1){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 2){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 3){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }   
+        if (n >= sizee || n%sizee==0){ // if matrix size >= number of processes
+          //MPI implementation-------------------------------------------
+          if (!checkSymMPI(M,n,1)){
+            vector<float> M_f = flatten(M);
+            vector<float> T_f(n*n,0);
+            for (int i = 0; i < TEST; ++i) {
+              MPI_Barrier(MPI_COMM_WORLD);
+              wt1 = omp_get_wtime();
+              matTransposeMPI(M_f ,T_f ,n ,rank ,sizee);
+              MPI_Barrier(MPI_COMM_WORLD);
+              wt2 = omp_get_wtime();
+    
+              if (rank == 0){
+                  T = deflatten(T_f,n);
+                  if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
+                  writeToFile("../output/MPI.csv",size,(wt2 - wt1),to_string(sizee));//-----------------------------------------write file implicit
+    
+              }
+              Itime += (wt2 - wt1);
+            }
+            if (rank == 0){cout <<" "<<size<< "\t" << (Itime/TEST)<< " sec\t" <<sizee<<" Processes "<< endl;}
+            Itime = 0;
+          }
+          if (rank == 0){
+            // Stampa la matrice trasposta nel terminale
+            //printMatrix(M, n);
+            cout << endl;
+            //printMatrix(T, n);  // Stampa la matrice trasposta            
+          }
+        }else{if (rank == 0){cout <<"To mutch processes for the number of rows or no processes at the power of 2  -----> ("<<n<<" rows for "<<sizee<<" Processes)"<< endl;}}
     }
     MPI_Finalize ();
     return 0;
