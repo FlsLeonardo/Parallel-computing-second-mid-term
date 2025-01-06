@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
     double wt1, wt2;  
     double Stime,Itime,Otime;                                           //for wall clock time
     int n_threads[8] = {1, 2, 4, 8, 16, 32, 64, 96};
-    int MPI_sizes[1] = {4};
+    int MPI_sizes[9] = {4,5,6,7,8,9,10,11,12};
     
     MPI_Init (& argc , & argv );
     int rank, sizee;
@@ -113,11 +113,11 @@ int main(int argc, char* argv[]) {
         //printMatrix(M,n);
         //printMatrix(T,n);
         if (rank == 0){
-          if(!checkSymSerial(M,n,1)){
+          if(!checkSymSerial(M,n)){
             for (int i = 0; i < TEST; ++i) {
                     //Serial implementation---------------------------------------------
                     wt1 = omp_get_wtime();
-                    matTransposeSerial(M,n,T,1);
+                    matTransposeSerial(M,n,T);
                     wt2 = omp_get_wtime();
                     if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
                     Stime += (wt2 - wt1);
@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
             cout <<"----------------------------------"<<endl;
             cout << "Serial Implemenation"<< endl;
             cout <<" "<<size<< "\t" << (Stime/TEST)<< " sec\t" << endl<<endl;
+            Stime = 0;
           }else{
             cout << "Symmetry corect"<< endl;
           }
@@ -151,53 +152,51 @@ int main(int argc, char* argv[]) {
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if (rank == 0){cout <<endl<< "MPI Implemenation"<< endl;}
-        //MPI implementation-------------------------------------------
-        checkSymMPI(M,n,1);
-        vector<float> M_f = flatten(M);
-        vector<float> T_f = flatten(T);
-        vector<float> Z(n*n,0);
-        vector<float> final(64*64,0);
-        for (int i = 0; i < TEST; ++i) {
-          MPI_Barrier(MPI_COMM_WORLD);
-          wt1 = omp_get_wtime();
-          matTransposeFlattenedMPI(M_f ,Z ,n ,rank ,sizee);
-          wt2 = omp_get_wtime();
-          MPI_Barrier(MPI_COMM_WORLD);
-          T = deflatten(Z,n);
-          //MPI_Gather(Z.data(),n * n / sizee, MPI_FLOAT, final.data(),n * n / sizee, MPI_FLOAT,0, MPI_COMM_WORLD);
-          //stampaFlat(Z);
-          //T = deflatten(final,n);
-          if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
-          Itime += (wt2 - wt1);
-          if (rank == 0){writeToFile("../output/MPI.csv",size,(wt2 - wt1),"n_processori_MPI_SIZE");} //-----------------------------------------write file implicit
-        }
-        cout <<" "<<size<< "\t" << (Itime/TEST)<< " sec\t" <<"rank "<<rank<<" size "<<sizee<< endl;
-        Itime = 0;
-        
-        if (rank == 0){
-          // Stampa la matrice trasposta nel terminale
-          printMatrix(M, n);
-          cout << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        } 
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 1){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 2){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-        if (rank == 3){
-          // Stampa la matrice trasposta nel terminale
-          //cout << "Matrix Transposed (T):" << endl;
-          printMatrix(T, n);  // Stampa la matrice trasposta            
-        }   
+        if (n >= sizee || n%sizee==0){ // if matrix size >= number of processes
+          //MPI implementation-------------------------------------------
+          vector<float> M_f = flatten(M);
+          vector<float> T_f(n*n,0);
+          bool isSym;
+          int int_bool_flag;
+          MPI_Bcast(M_f.data(), n*n, MPI_FLOAT, 0, MPI_COMM_WORLD);// cosi ho tutte le matrici uguli per ogni rank altimenti avrei matrici diverse...
+          int_bool_flag = checkSymMPI(M_f, n, rank, sizee);
+          int global_bool_flag;
+
+          MPI_Allreduce(&int_bool_flag, &global_bool_flag, 1, MPI_INT, MPI_PROD, MPI_COMM_WORLD);
+          isSym = global_bool_flag;
+          
+          
+          if (!isSym){
+            
+            for (int i = 0; i < TEST; ++i) {
+            
+              MPI_Barrier(MPI_COMM_WORLD);
+              wt1 = omp_get_wtime();
+              matTransposeMPI4(M_f ,T_f ,n ,rank ,sizee);
+              MPI_Barrier(MPI_COMM_WORLD);
+              wt2 = omp_get_wtime();
+    
+              if (rank == 0){
+                  T = deflatten(T_f,n);
+                  if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
+                  writeToFile("../output/MPI.csv",size,(wt2 - wt1),to_string(sizee));//-----------------------------------------write file implicit
+              }
+              
+              Itime += (wt2 - wt1);
+              
+            }
+            
+            if (rank == 0){cout <<" "<<size<< "\t" << (Itime/TEST)<< " sec\t" <<sizee<<" Processes "<< endl;}
+            Itime = 0;
+            
+          }
+          if (rank == 0){
+            // Stampa la matrice trasposta nel terminale
+            //printMatrix(M, n);
+            cout << endl;
+            //printMatrix(T, n);  // Stampa la matrice trasposta            
+          }
+        }else{if (rank == 0){cout <<"To mutch processes for the number of rows or no processes at the power of 2  -----> ("<<n<<" rows for "<<sizee<<" Processes)"<< endl;}}
     }
     MPI_Finalize ();
     return 0;

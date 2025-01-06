@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-void matTransposeSerial(vector<vector<float>>& M,int n,vector<vector<float>>& T,int n_thread){
+void matTransposeSerial(vector<vector<float>>& M,int n,vector<vector<float>>& T){
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
              T[j][i] = M[i][j];
@@ -11,7 +11,7 @@ void matTransposeSerial(vector<vector<float>>& M,int n,vector<vector<float>>& T,
     }
 }
 
-bool checkSymSerial(const vector<vector<float>>& M,int n, int n_thread){
+bool checkSymSerial(const vector<vector<float>>& M,int n){
     bool isSymmetric = true; 
 
     for (size_t i = 0; i < n; ++i) {
