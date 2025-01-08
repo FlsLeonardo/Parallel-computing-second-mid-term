@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
@@ -98,8 +99,16 @@ void stampaFlat(const vector<float>& vec) {
 int main(int argc, char* argv[]) {
     double wt1, wt2;  
     double Stime,Itime,Otime;                                           //for wall clock time
-    int n_threads[8] = {1, 2, 4, 8, 16, 32, 64, 96};
-    int MPI_sizes[9] = {4,5,6,7,8,9,10,11,12};
+    std::vector<int> n_threads = {1, 2, 4, 8, 16, 32, 64};
+    std::vector<int> MPI_sizes = {4, 5, 6, 7, 8, 9, 10, 11, 12};
+    std::string onlyMPI = "";
+    if (argc == 3) {
+        onlyMPI = argv[1];
+        int param = std::stoi(argv[2]);
+        MPI_sizes = {param};
+    }
+    
+    
     
     MPI_Init (& argc , & argv );
     int rank, sizee;
@@ -112,43 +121,45 @@ int main(int argc, char* argv[]) {
         initializeMatrix(M, n);                                      // Inizializziamo la matrice con valori casuali
         //printMatrix(M,n);
         //printMatrix(T,n);
-        if (rank == 0){
-          if(!checkSymSerial(M,n)){
-            for (int i = 0; i < TEST; ++i) {
-                    //Serial implementation---------------------------------------------
-                    wt1 = omp_get_wtime();
-                    matTransposeSerial(M,n,T);
-                    wt2 = omp_get_wtime();
-                    if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
-                    Stime += (wt2 - wt1);
-                    writeToFile("../output/Serial.csv",size,(wt2 - wt1));     //--------------------------------------------write file Serial
-            }
-            cout <<"----------------------------------"<<endl;
-            cout << "Serial Implemenation"<< endl;
-            cout <<" "<<size<< "\t" << (Stime/TEST)<< " sec\t" << endl<<endl;
-            Stime = 0;
-          }else{
-            cout << "Symmetry corect"<< endl;
-          }
-  
-          cout << "Omp Implemenation"<< endl;
-          for (int& thread_count : n_threads) {
-              if(!checkSymOmp(M,n,thread_count)){
-                for (int i = 0; i < TEST; ++i) {
-                    //Omp implementation-------------------------------------------------
-                    wt1 = omp_get_wtime();
-                    matTransposeOmp(M,n,T,thread_count);
-                    wt2 = omp_get_wtime();
-                    if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
-                    Otime += (wt2 - wt1);
-                    writeToFile("../output/Omp.csv",size,(wt2 - wt1),to_string(thread_count)); //---------------------------write file OMP
-                }
-                cout <<" "<<size << "\t" << (Otime/TEST)<< " sec\t" <<thread_count<<" threads"<< endl;
-    
-                Otime = 0;
+        if (onlyMPI != "mpi"){
+          if (rank == 0){
+            if(!checkSymSerial(M,n)){
+              for (int i = 0; i < TEST; ++i) {
+                      //Serial implementation---------------------------------------------
+                      wt1 = omp_get_wtime();
+                      matTransposeSerial(M,n,T);
+                      wt2 = omp_get_wtime();
+                      if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
+                      Stime += (wt2 - wt1);
+                      writeToFile("../output/Serial.csv",size,(wt2 - wt1));     //--------------------------------------------write file Serial
               }
+              cout <<"----------------------------------"<<endl;
+              cout << "Serial Implemenation"<< endl;
+              cout <<" "<<size<< "\t" << (Stime/TEST)<< " sec\t" << endl<<endl;
+              Stime = 0;
+            }else{
+              cout << "Symmetry corect"<< endl;
+            }
+    
+            cout << "Omp Implemenation"<< endl;
+            for (int& thread_count : n_threads) {
+                if(!checkSymOmp(M,n,thread_count)){
+                  for (int i = 0; i < TEST; ++i) {
+                      //Omp implementation-------------------------------------------------
+                      wt1 = omp_get_wtime();
+                      matTransposeOmp(M,n,T,thread_count);
+                      wt2 = omp_get_wtime();
+                      if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
+                      Otime += (wt2 - wt1);
+                      writeToFile("../output/Omp.csv",size,(wt2 - wt1),to_string(thread_count)); //---------------------------write file OMP
+                  }
+                  cout <<" "<<size << "\t" << (Otime/TEST)<< " sec\t" <<thread_count<<" threads"<< endl;
+      
+                  Otime = 0;
+                }
+            }
+            
           }
-          
         }
         MPI_Barrier(MPI_COMM_WORLD);
         if (rank == 0){cout <<endl<< "MPI Implemenation"<< endl;}
