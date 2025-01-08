@@ -14,7 +14,7 @@ def main():
         for num in range(4, 13):
             efficency_speedup("../output/Omp.csv",num)
         speedup("../output/Omp.csv")
-        efficiency("../output/Omp.csv","../output/MPI.csv","../output/Serial.csv")
+        efficiency("../output/Omp.csv")
         sys.exit(1)
     for arg in sys.argv:
         if "--help" in arg:
@@ -227,6 +227,7 @@ def efficency_speedup(filename,dim_matrix):
 
 def speedup(filename, colors=None):
     data = {}
+    
     # Leggi i dati dal file e raccoglili in un dizionario
     with open(filename, mode='r', encoding='utf-8') as file:
         for line in file:
@@ -287,10 +288,9 @@ def speedup(filename, colors=None):
     # plt.show()  # Usa questa linea per visualizzare il grafico interattivamente
     plt.clf()
     
-def efficiency(filename,filename2,seriale, colors=None):
+def efficiency(filename, colors=None):
     data = {}
-    timeserial = []
-    dimserial = []
+    
     # Leggi i dati dal file e raccoglili in un dizionario
     with open(filename, mode='r', encoding='utf-8') as file:
         for line in file:
@@ -305,15 +305,7 @@ def efficiency(filename,filename2,seriale, colors=None):
             if threads not in data[dim]:
                 data[dim][threads] = []
             data[dim][threads].append(time)
-            
-    with open(seriale, mode='r', encoding='utf-8') as file:
-        for line in file:
-            values = line.strip().split(';')
-            dimserial.append(int(values[0]))  # Dimensione della matrice
-            timeserial.append(float(values[1]))  # Tempo di esecuzione
-    seriale = media(dimserial,timeserial,dimserial)        
-    dimserial, timeserial, inutile = zip(*seriale)              
-    print(dimserial)
+
     # Calcola la media dei tempi per ciascun gruppo (dim, threads)
     averaged_data = {}
 
@@ -324,21 +316,20 @@ def efficiency(filename,filename2,seriale, colors=None):
             if dim not in averaged_data:
                 averaged_data[dim] = {}
             averaged_data[dim][threads] = average_time
-    print(averaged_data)
+    
     # Creazione del grafico
     plt.figure(figsize=(10, 6))  # Dimensione del grafico
     color_index = 0  # Indice per i colori
     default_colors = ['#ff0000', '#ff6100', '#ffdc00', '#55ff00', '#00ecff', '#0027ff', '#ae00ff', '#ff00f0', '#C70039', '#FFB6C1']
     
     # Usa i dati medi per calcolare l'efficienza e plottare
-    iteratore = 0;
     for dim, threads_dict in averaged_data.items():
         # Ordina i dati per numero di thread
         sorted_threads = sorted(threads_dict.keys())
         sorted_times = [threads_dict[t] for t in sorted_threads]
         
         # Calcola il tempo seriale (tempo per il numero minimo di thread)
-        serial_time = timeserial[iteratore]
+        serial_time = sorted_times[0]
         
         # Calcola speedup ed efficienza
         speedup = [serial_time / time for time in sorted_times]
@@ -349,60 +340,8 @@ def efficiency(filename,filename2,seriale, colors=None):
         color_index = (color_index + 1) % len(default_colors)
         
         # Plotta i dati
-        plt.plot(sorted_threads, efficiency, marker='o', linestyle='--', color=color, label=f'Matrice {dim}x{dim} OMP')
-        iteratore +=1
+        plt.plot(sorted_threads, efficiency, marker='o', linestyle='--', color=color, label=f'Matrice {dim}x{dim}')
     
-    data = {}
-    # Leggi i dati dal file e raccoglili in un dizionario
-    with open(filename2, mode='r', encoding='utf-8') as file:
-        for line in file:
-            values = line.strip().split(';')
-            dim = int(values[0])  # Dimensione della matrice
-            time = float(values[1])  # Tempo di esecuzione
-            threads = int(values[2])  # Numero di thread
-            
-            # Aggiungi i dati al dizionario, raggruppati per dimensione e numero di thread
-            if dim not in data:
-                data[dim] = {}
-            if threads not in data[dim]:
-                data[dim][threads] = []
-            data[dim][threads].append(time)
-    averaged_data = {}
-
-    for dim, threads_dict in data.items():
-        for threads, times in threads_dict.items():
-            # Calcola la media dei tempi
-            average_time = sum(times) / len(times)
-            if dim not in averaged_data:
-                averaged_data[dim] = {}
-            averaged_data[dim][threads] = average_time
-    print(averaged_data)
-    # Creazione del grafico
-    plt.figure(figsize=(10, 6))  # Dimensione del grafico
-    color_index = 0  # Indice per i colori
-    default_colors = ['#ff0000', '#ff6100', '#ffdc00', '#55ff00', '#00ecff', '#0027ff', '#ae00ff', '#ff00f0', '#C70039', '#FFB6C1']
-    
-    # Usa i dati medi per calcolare l'efficienza e plottare
-    iteratore = 0;
-    for dim, threads_dict in averaged_data.items():
-        # Ordina i dati per numero di thread
-        sorted_threads = sorted(threads_dict.keys())
-        sorted_times = [threads_dict[t] for t in sorted_threads]
-        
-        # Calcola il tempo seriale (tempo per il numero minimo di thread)
-        serial_time = timeserial[iteratore]
-        
-        # Calcola speedup ed efficienza
-        speedup = [serial_time / time for time in sorted_times]
-        efficiency = [(s / t) * 100 for s, t in zip(speedup, sorted_threads)]  # efficienza in percentuale
-
-        # Usa il colore fornito o il colore predefinito
-        color = colors[color_index] if colors else default_colors[color_index]
-        color_index = (color_index + 1) % len(default_colors)
-        
-        # Plotta i dati
-        plt.plot(sorted_threads, efficiency, marker='o', linestyle='--', color=color, label=f'Matrice {dim}x{dim} MPI')
-        iteratore +=1
     # Personalizzazione del grafico
     plt.xlabel('Numero di Thread')
     plt.ylabel('Efficienza (%)')
@@ -429,8 +368,8 @@ def media(dimensione, tempi, tipo):
         risultati.append((dim, media_tempi, tpo))
 
     # Risultati finali
-    #for r in risultati:
-        #print(f"Dimensione: {r[0]}, Media tempi: {r[1]}, Tipo: {r[2]}")
+    for r in risultati:
+        print(f"Dimensione: {r[0]}, Media tempi: {r[1]}, Tipo: {r[2]}")
     return risultati
 if __name__ == "__main__":
     main()
