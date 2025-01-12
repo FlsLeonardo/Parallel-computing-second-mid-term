@@ -1,0 +1,173 @@
+The running nodes are hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it hpc-c04-node05.unitn.it
+The running nodes are hpc-c04-node05.unitn.it
+Node: hpc-c04-node05.unitn.it
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                72
+On-line CPU(s) list:   0-71
+Thread(s) per core:    1
+Core(s) per socket:    18
+Socket(s):             4
+NUMA node(s):          4
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 85
+Model name:            Intel(R) Xeon(R) Gold 5220 CPU @ 2.20GHz
+Stepping:              7
+CPU MHz:               2200.000
+BogoMIPS:              4400.00
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              1024K
+L3 cache:              25344K
+NUMA node0 CPU(s):     0-17
+NUMA node1 CPU(s):     18-35
+NUMA node2 CPU(s):     36-53
+NUMA node3 CPU(s):     54-71
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch epb cat_l3 cdp_l3 invpcid_single intel_ppin intel_pt ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts pku ospke avx512_vnni md_clear spec_ctrl intel_stibp flush_l1d arch_capabilities
+----------------------------------
+Serial Implemenation
+ 4	2.19792e-06 sec	
+
+Omp Implemenation
+ 4	2.89381e-06 sec	1 threads
+ 4	9.17464e-06 sec	2 threads
+ 4	1.27628e-05 sec	4 threads
+ 4	1.16304e-05 sec	8 threads
+ 4	1.2657e-05 sec	16 threads
+ 4	1.47372e-05 sec	32 threads
+ 4	2.93702e-05 sec	64 threads
+
+MPI Implemenation
+ 4	7.10934e-06 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 5	9.95845e-06 sec	
+
+Omp Implemenation
+ 5	9.17763e-06 sec	1 threads
+ 5	3.53247e-05 sec	2 threads
+ 5	3.15651e-05 sec	4 threads
+ 5	3.56227e-05 sec	8 threads
+ 5	2.97442e-05 sec	16 threads
+ 5	2.89872e-05 sec	32 threads
+ 5	0.00302161 sec	64 threads
+
+MPI Implemenation
+ 5	5.6684e-06 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 6	3.85806e-05 sec	
+
+Omp Implemenation
+ 6	3.33533e-05 sec	1 threads
+ 6	9.21845e-05 sec	2 threads
+ 6	9.10968e-05 sec	4 threads
+ 6	9.0684e-05 sec	8 threads
+ 6	8.15362e-05 sec	16 threads
+ 6	6.51315e-05 sec	32 threads
+ 6	7.00682e-05 sec	64 threads
+
+MPI Implemenation
+ 6	9.38922e-06 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 7	0.000134744 sec	
+
+Omp Implemenation
+ 7	0.000132589 sec	1 threads
+ 7	0.000185288 sec	2 threads
+ 7	0.000179052 sec	4 threads
+ 7	0.000186104 sec	8 threads
+ 7	0.000129965 sec	16 threads
+ 7	0.000108163 sec	32 threads
+ 7	0.000108336 sec	64 threads
+
+MPI Implemenation
+ 7	1.85579e-05 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 8	0.000512984 sec	
+
+Omp Implemenation
+ 8	0.000536014 sec	1 threads
+ 8	0.000776659 sec	2 threads
+ 8	0.000367714 sec	4 threads
+ 8	0.000222369 sec	8 threads
+ 8	0.000185722 sec	16 threads
+ 8	0.000170471 sec	32 threads
+ 8	0.000160906 sec	64 threads
+
+MPI Implemenation
+ 8	5.08219e-05 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 9	0.00228339 sec	
+
+Omp Implemenation
+ 9	0.00232987 sec	1 threads
+ 9	0.00250532 sec	2 threads
+ 9	0.00128472 sec	4 threads
+ 9	0.000708142 sec	8 threads
+ 9	0.000390156 sec	16 threads
+ 9	0.000399409 sec	32 threads
+ 9	0.00598519 sec	64 threads
+
+MPI Implemenation
+ 9	0.00024644 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 10	0.0093726 sec	
+
+Omp Implemenation
+ 10	0.00945036 sec	1 threads
+ 10	0.00500311 sec	2 threads
+ 10	0.00500634 sec	4 threads
+ 10	0.00335897 sec	8 threads
+ 10	0.00157326 sec	16 threads
+ 10	0.001018 sec	32 threads
+ 10	0.00634922 sec	64 threads
+
+MPI Implemenation
+ 10	0.00115886 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 11	0.0518617 sec	
+
+Omp Implemenation
+ 11	0.0525387 sec	1 threads
+ 11	0.0458026 sec	2 threads
+ 11	0.0240719 sec	4 threads
+ 11	0.0142158 sec	8 threads
+ 11	0.00676377 sec	16 threads
+ 11	0.0114293 sec	32 threads
+ 11	0.00246899 sec	64 threads
+
+MPI Implemenation
+ 11	0.0124574 sec	8 Processes 
+
+----------------------------------
+Serial Implemenation
+ 12	0.24533 sec	
+
+Omp Implemenation
+ 12	0.257925 sec	1 threads
+ 12	0.14748 sec	2 threads
+ 12	0.100042 sec	4 threads
+ 12	0.0586579 sec	8 threads
+ 12	0.0411843 sec	16 threads
+ 12	0.0494915 sec	32 threads
+ 12	0.0497343 sec	64 threads
+
+MPI Implemenation
+ 12	0.0583096 sec	8 Processes 
+

@@ -7,34 +7,40 @@
 # Queue name
 #PBS -q short_cpuQ
 # Set the maximum wall time
-#PBS -l walltime=0:10:00
+#PBS -l walltime=0:02:00
 # Number of nodes, cpus, mpi processors and amount of memory
-#PBS -l select=1:ncpus=96:ompthreads=96:mem=1mb
+#PBS -l select=1:ncpus=64:mpiprocs=64:mem=256mb
 
-# Modules for C
+# Modules for python and MPI
 module load gcc91
+module load mpich-3.2.1--gcc-9.1.0
 
-# Select the working directory
-cd /home/leonardo.falsarolo/Parallel-computing-mid-term/method1/bin
+# Print the name of the file that contains the list of the nodes assigned to the job and list all the nodes
+NODES=$(cat $PBS_NODEFILE)
+echo The running nodes are $NODES
 
-lscpu
-echo
+# Get the list of unique nodes assigned to the job
+NODES=$(sort -u $PBS_NODEFILE)
+echo The running nodes are $NODES
 
-#compilation
-g++-9.1.0 -c main.cpp -fopenmp
-g++-9.1.0 -c serialTransposition.cpp
-g++-9.1.0 -c implicitTransposition.cpp -O1 -funroll-loops -ftree-loop-im
-g++-9.1.0 -c ompTransposition.cpp -fopenmp
-#linking
-g++-9.1.0 main.o serialTransposition.o implicitTransposition.o ompTransposition.o -o matTranspose1 -fopenmp
-#execution
-./matTranspose1 4 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 5 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 6 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 7 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 8 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 9 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 10 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 11 "O1 -funroll-loop -ftree-loop-im"
-./matTranspose1 12 "O1 -funroll-loop -ftree-loop-im"
+# Loop through each node and get architecture information
+for NODE in $NODES; do
+    echo "Node: $NODE"
+    ssh $NODE "lscpu"
+done
+
+# Select the working directory 
+cd /home/leonardo.falsarolo/Parallel-computing-second-mid-term/9/Parallel-computing-second-mid-term/method1/bin
+
+# the code should be previously compiled
+#mpicc code_mpi.c -o code.out
+#mpicxx code_mpi.cpp -o code.out
+mpicxx -c main.cpp -fopenmp
+mpicxx -c serialTransposition.cpp
+mpicxx -c MPITransposition.cpp
+mpicxx -c ompTransposition.cpp -fopenmp
+mpicxx main.o serialTransposition.o MPITransposition.o ompTransposition.o -o Main -fopenmp
+
+# Run the code
+mpirun -np 8 ./Main
 

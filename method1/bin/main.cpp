@@ -126,9 +126,11 @@ int main(int argc, char* argv[]) {
             if(!checkSymSerial(M,n)){
               for (int i = 0; i < TEST; ++i) {
                       //Serial implementation---------------------------------------------
+
                       wt1 = omp_get_wtime();
                       matTransposeSerial(M,n,T);
-                      wt2 = omp_get_wtime();
+                      wt2 = omp_get_wtime();                         
+                      
                       if(!checkTransposition(M,n,T)){cout<<"transpose not correct"<<endl;}
                       Stime += (wt2 - wt1);
                       writeToFile("../output/Serial.csv",size,(wt2 - wt1));     //--------------------------------------------write file Serial
@@ -181,11 +183,37 @@ int main(int argc, char* argv[]) {
             
             for (int i = 0; i < TEST; ++i) {
             
+              int works = sizee;
+              int rows_x_worker = n / works;
+              int remain_rows = n % works;
+          
+              // Calcolo dei range di righe per ogni rank
+              int start = rank * rows_x_worker + std::min(rank, remain_rows);
+              int end = start + rows_x_worker + (rank < remain_rows);
+              int rows = end - start;
+          
+              // Ogni rank trasforma solo le proprie righe assegnate
+              std::vector<float> local_trans(rows * n);
+                                    
+            
               MPI_Barrier(MPI_COMM_WORLD);
               wt1 = omp_get_wtime();
-              matTransposeMPI4(M_f ,T_f ,n ,rank ,sizee);
+              matTransposeMPI(M_f ,local_trans ,n ,rank , start,end);
               MPI_Barrier(MPI_COMM_WORLD);
               wt2 = omp_get_wtime();
+              
+                                 // Raccogli i risultati su rank 0
+              MPI_Gather(
+                  local_trans.data(),         // Buffer locale
+                  rows * n,             // Numero di elementi da inviare
+                  MPI_FLOAT,                  // Tipo di dati
+                  T_f.data(),               // Buffer di raccolta (solo su rank 0)
+                  rows * n,             // Numero di elementi da ricevere per processo
+                  MPI_FLOAT,                  // Tipo di dati
+                  0,                          // Destinatario (rank 0)
+                  MPI_COMM_WORLD              // Comunicatore
+              );
+               
     
               if (rank == 0){
                   T = deflatten(T_f,n);
