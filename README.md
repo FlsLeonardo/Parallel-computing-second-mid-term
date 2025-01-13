@@ -6,13 +6,10 @@
 
 
 **#C++ #Python #Benchmark #Graph #Matrix_transposition #OpenMP #Mpi #Mpirun #mpiprocs #mpicxx #Data**
+## Parallel computing
+![Beautiful Landscape](https://images.unsplash.com/photo-1667372459510-55b5e2087cd0?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 
-<div style="position: relative; display: inline-block; text-align: center;">
-  <img src="https://images.unsplash.com/photo-1667372459510-55b5e2087cd0?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Beautiful Landscape" width="100%">
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px; background-color: rgba(0, 0, 0, 0.5); padding: 10px;">
-  <h3>Parallel computing<h3>
-  </div>
-</div>
+https://github.com/FlsLeonardo/Parallel-computing-second-mid-term
 
 ## Description of the Second Mid Term
 The goal of this research is to optimize matrix transposition by analyzing the effectiveness of different techniques, focusing on serial execution, OpenMP, and MPI. The serial implementation serves as the baseline method without any form of parallelization and is used as a reference for comparison. OpenMP is employed to enable explicit parallelization within shared memory systems, leveraging specific directives to distribute the workload among threads efficiently. MPI (Message Passing Interface) is used to explore distributed parallelization, where the workload is partitioned across multiple processes that communicate via message passing, making it suitable for clusters or multi-node systems. 
@@ -46,6 +43,8 @@ This study provides valuable insights into the performance scaling and communica
     * numpy 
     * pandas 
 ---
+![Beautiful Landscape](https://images.unsplash.com/photo-1667372459534-848ec00d4da7?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
+
 ## How To Use
 
 To clone and run this application, you'll need [Git](https://git-scm.com) installed on your computer. From your command line:
@@ -95,31 +94,31 @@ With parmeters it compile and run the project.
 `compiler.sh` has different execution strategies also..
 ```bash
     Compile.sh $1 $2
-    # $1 Number of Processors used
+    # $1 Number of Processes used
     # $2 Size of the Matrix
 ```
 
 - Possiility of executing with 1 parameter: 
-    - example: ``` > Compile.sh 16 ``` witch are the number of Processors used
+    - example: ``` > Compile.sh 16 ``` witch are the number of Processes used
 - Possiility of choosing 2 parameters:
-    - example: ``` > Compile.sh 16 10 ``` so 16 Processors used to compute the transposition of a 2^20 x 2^10 matrix
+    - example: ``` > Compile.sh 16 10 ``` so 16 Processes used to compute the transposition of a 2^20 x 2^10 matrix
 
 (_By default the compiler.sh will only compiles the file_)
 
 ## Using Mpirun
 We have 3 possibilities of execution:
 
-1) Choosing only the number of Processors and then doing everything ```(Seqential code , Omp code , MPI code)```.
+1) Choosing only the number of Processes and then doing everything ```(Seqential code , Omp code , MPI code)```.
 ```python
-mpirun -np "number_of_Processors" ./Main  
+mpirun -np "number_of_Processes" ./Main  
 ```
-2) Choosing the number of Processors and then doing only the MPI code for that given ```Matrix Size```.
+2) Choosing the number of Processes and then doing only the MPI code for that given ```Matrix Size```.
 ```python
-mpirun -np "number_of_Processors" ./Main  mpi "matrix_size"
+mpirun -np "number_of_Processes" ./Main  mpi "matrix_size"
 ```
-3) Choosing the number of Processors and then doing ```(Serial,OMP,MPI)``` codes for that given ```Matrix Size```.
+3) Choosing the number of Processes and then doing ```(Serial,OMP,MPI)``` codes for that given ```Matrix Size```.
   ```python
-  mpirun -np "number_of_Processors" ./Main  all "matrix_size"
+  mpirun -np "number_of_Processes" ./Main  all "matrix_size"
   ```
 
 
@@ -135,7 +134,7 @@ Parallel-computing-mid-term/"Method1"/bin>  ./Compile.sh
 ```
 Than execute the Main program:
 ```python
-Parallel-computing-mid-term/"Method1"/bin>  mpirun -np "number_of_Processors" ./Main  all "matrix_size"
+Parallel-computing-mid-term/"Method1"/bin>  mpirun -np "number_of_Processes" ./Main  all "matrix_size"
 ```
 
 - Is it possible also to execute `python graph.py` that does all the graphs thanks to the `files.csv` in the output folder
@@ -146,6 +145,9 @@ list of command executable for `graph.py`:
 
 (_By default the file graph.py does all the file and all the possible functions_)
 
+
+
+![Beautiful Landscape](https://images.unsplash.com/photo-1667372459607-2cfe842fdc4b?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 ### Structure of the project
 - **Parallel-computing-Second-mid-term**
   - **method1**
